@@ -160,7 +160,10 @@ export class MessyHandsMain extends BaseScriptComponent {
     const m = this.inbox.current()
     if (!m) return
     this.phase = "draft"
-    this.card.showDraft(m.sender, "You said: " + m.gist, m.reply)
+    // Quoted, not labelled "You said:". At the card's new type size that label
+    // cost a whole wrapped line and pushed the draft under the button row; the
+    // quotes carry the same meaning in two characters.
+    this.card.showDraft(m.sender, "\u201c" + m.gist + "\u201d", m.reply)
     console.log("[MessyHandsMain] draft ready for " + m.sender)
   }
 

@@ -35,11 +35,21 @@ const ICON_SEND = requireAsset("../Icons/send.png") as Texture
 const ICON_REMOVE = requireAsset("../Icons/delete.png") as Texture
 
 // ── Typography: single source of truth for text size + weight ────────────────
-// `Component.Text.size` is the glyph em-square height (em cm = size / 43.886),
-// calibrated for the SnapOS system font at the z = -110 cm focal plane. This
-// card sits ~85 cm from the eye, so every role is applied at that distance and
-// the scale shrinks each size by 85/110 - same visual angle, smaller card.
-const FONT_SIZE_SCALE = 1.0
+// `Component.Text.size` is the glyph em-square height (em cm = size / 43.886).
+// The SnapOS system scale is calibrated for reading at z = -110 cm, i.e. a panel
+// held up near the face. This card does NOT live there: it lies flat-ish on a
+// counter ~85 cm away and gets read at a glance, side-on, while the user's eyes
+// are really on the dough.
+//
+// The first build sized the text by the system scale and then multiplied by
+// 85/110, preserving the *visual angle* of a near-eye panel. That was the bug:
+// it put Body at a 0.69 cm em, which reads fine held up at arm's length and is
+// too small for a glance down at a counter. A counter card needs a bigger
+// visual angle than a held panel, not the same one.
+//
+// So: no distance shrink, plus an explicit boost. Every glyph on the card is
+// 1.45 / (85/110) = 1.88x the height it was.
+const FONT_SIZE_SCALE = 1.45
 
 type TextRole =
   | "Title1" | "Title2" | "HeadlineXL" | "Headline1" | "Headline2"
@@ -58,15 +68,18 @@ const TYPE_SCALE: Record<TextRole, {size: number; weight: number}> = {
   Caption:     {size: 38,  weight: 500},
 }
 
-/** The card's own focal distance - all text is sized for this, not for 110 cm. */
-const CARD_DISTANCE_CM = 85
-
-function roleSize(role: TextRole, distanceCm: number = CARD_DISTANCE_CM): number {
-  return TYPE_SCALE[role].size * FONT_SIZE_SCALE * (distanceCm / 110)
+/**
+ * Nothing on this card uses Caption or Body-at-system-size any more. The two
+ * smallest roles were where the unreadable text lived, so the panes were moved
+ * up the scale: snippet / message / draft are Body or Callout, the sender name
+ * and the count line are Headline2, "Sent" is Headline1.
+ */
+function roleSize(role: TextRole): number {
+  return TYPE_SCALE[role].size * FONT_SIZE_SCALE
 }
 
-function applyTextRole(t: Text, role: TextRole, distanceCm: number = CARD_DISTANCE_CM): void {
-  t.size = roleSize(role, distanceCm)
+function applyTextRole(t: Text, role: TextRole): void {
+  t.size = roleSize(role)
   ;(t as Text & {weight?: number}).weight = TYPE_SCALE[role].weight
 }
 
@@ -75,9 +88,19 @@ const CONTENT_Z = 0.6       // content child, forward of the plate's front face
 const BUTTON_LABEL_Z = 0.08 // content drawn ON a button face
 const LAYOUT_Z_LIFT = 0.02
 
+// Every colour here is near-white at full alpha, on purpose.
+//
+// The display is additive: it only ever ADDS light to what the eye already
+// sees, so an alpha below 1 is a direct subtraction of contrast against a lit
+// kitchen with nothing gained. The first build dimmed secondary text to 0.7
+// alpha and tinted the draft a mid-green, both of which washed out. Hierarchy
+// on this card now comes from size and weight, never from fading text.
 const TEXT_PRIMARY = new vec4(1, 1, 1, 1)
-const TEXT_SECONDARY = new vec4(1, 1, 1, 0.7)
-const TEXT_DRAFT = new vec4(0.6, 0.92, 0.72, 1)
+const TEXT_SECONDARY = new vec4(0.95, 0.96, 1, 1)
+const TEXT_DRAFT = new vec4(0.72, 1, 0.84, 1)
+
+/** UI Kit paints button and row labels at 0.85 grey. Overridden to pure white. */
+const TEXT_CONTROL = new vec4(1, 1, 1, 1)
 
 /**
  * How long the card waits before swapping panes. A state change is always
@@ -85,13 +108,37 @@ const TEXT_DRAFT = new vec4(0.6, 0.92, 0.72, 1)
  * button; tearing it down while SIK is still unwinding the pinch kills the
  * input event ("Object is null"). This is long enough for the interaction to
  * finish against a live object, short enough to read as instant.
+ *
+ * Raised from 0.12 s after the design fix. 0.12 s cleared the SCRIPTED
+ * interactor, but not the PHYSICAL one: a real (or IK) hand keeps a
+ * "recently ended" reference to the button it just pinched, and destroying
+ * that button inside the window makes SIK's PhysicalInteractionProvider throw
+ * "Object is null" every frame from clearRecentlyEndedStateIfNeeded - which
+ * then stops the hand acquiring the button that replaced it. Measured: with
+ * 0.12 s the IK reach test converged on "Who wrote" about half the time; the
+ * scripted path never saw it, because it does not hold that state.
  */
-const REBUILD_DELAY_S = 0.12
+const REBUILD_DELAY_S = 0.35
 
 const PAD = 1.2
-const STATUS_H = 2.6
+const STATUS_H = 3.4 // fits the Headline2 count line
+const HEADER_H = 3.2
 const ROOT_GAP = 0.7
 const PANE_GAP = 0.5
+
+/**
+ * Sender rows share out whatever the pane has spare, so three names at this
+ * type size get 5.5 cm each instead of the 4.4 cm floor. Capped so a one-
+ * message inbox does not render a single 17 cm button.
+ */
+const SENDER_ROW_MAX = 6.5
+
+/**
+ * Button icon size in cm. UI Kit defaults to 1.5, which was proportionate to
+ * the old small labels and reads as a speck next to the new ones. 2.4 cm gives
+ * the icon the same visual weight as its label inside a 4.4 cm row.
+ */
+const CONTROL_ICON_CM = 2.4
 
 /** What the card is currently showing. View state only - no domain data. */
 type CardPane =
@@ -116,8 +163,8 @@ export class MessyHandsCardUI extends BaseScriptComponent {
 
   @input
   @widget(new SliderWidget(12, 28, 0.5))
-  @hint("Card height in cm. 20 cm fits three 4 cm sender rows plus the status line.")
-  cardHeightCm: number = 20
+  @hint("Card height in cm. 24 cm fits the larger type: three 5.5 cm sender rows, or a wrapped message plus a draft plus the button row.")
+  cardHeightCm: number = 24
 
   @input
   @widget(new SliderWidget(3, 7, 0.1))
@@ -298,16 +345,16 @@ export class MessyHandsCardUI extends BaseScriptComponent {
     const header = headerObj.createComponent("Component.Text") as Text
     header.text = this.headerLine
     header.depthTest = true
-    applyTextRole(header, "Subheadline")
+    applyTextRole(header, "Headline2")
     header.textFill.color = TEXT_PRIMARY
     header.horizontalAlignment = HorizontalAlignment.Left
     header.verticalAlignment = VerticalAlignment.Center
     header.horizontalOverflow = HorizontalOverflow.Overflow
     header.verticalOverflow = VerticalOverflow.Overflow
-    header.layoutRect = Rect.create(-headerW / 2, headerW / 2, -1.2, 1.2)
+    header.layoutRect = Rect.create(-headerW / 2, headerW / 2, -HEADER_H / 2, HEADER_H / 2)
     const headerItem = headerObj.createComponent(FlexItem.getTypeName()) as FlexItem
     headerItem.overrideWidth = headerW
-    headerItem.overrideHeight = 2.2
+    headerItem.overrideHeight = HEADER_H
     this.headerText = header
 
     statusFlex.addItems([dotItem, headerItem])
@@ -343,6 +390,17 @@ export class MessyHandsCardUI extends BaseScriptComponent {
    * stale positions - so every state change unregisters and destroys the old
    * rows, then builds and registers new ones.
    */
+  /**
+   * The height the changing half of the card has to work with. Row heights are
+   * derived from this rather than hard-coded, so the button row always lands on
+   * the card's lower edge (the brief asks for that) whatever the card height
+   * @input is set to, and the text rows absorb the slack instead of leaving the
+   * buttons floating mid-card.
+   */
+  private paneHeightCm(): number {
+    return this.cardHeightCm - PAD * 2 - STATUS_H - ROOT_GAP
+  }
+
   private renderPane(): void {
     const host = this.paneHost
     const flex = this.paneFlex
@@ -358,11 +416,16 @@ export class MessyHandsCardUI extends BaseScriptComponent {
     }
 
     const innerW = this.cardWidthCm - PAD * 2
+    const paneH = this.paneHeightCm()
+    const btnH = this.buttonHeightCm
     const items: FlexItem[] = []
     const p = this.pane
 
     if (p.kind === "idle" || p.kind === "compact") {
-      items.push(this.addTextRow(host, p.snippet, "Caption", 5.0, innerW, TEXT_SECONDARY, true))
+      // One text row taking everything that is not the button row: the snippet
+      // sits centred in the card's upper half, the button on its lower edge.
+      const snippetH = paneH - btnH - PANE_GAP
+      items.push(this.addTextRow(host, p.snippet, "Body", snippetH, innerW, TEXT_SECONDARY, true))
       if (p.kind === "idle") {
         items.push(this.addButtonRow(host, innerW, [
           {label: "Start", icon: ICON_START, action: () => this._onStart.invoke()},
@@ -373,30 +436,45 @@ export class MessyHandsCardUI extends BaseScriptComponent {
         ]))
       }
     } else if (p.kind === "senders") {
-      for (let i = 0; i < p.senders.length; i++) {
+      const n = p.senders.length
+      const share = (paneH - PANE_GAP * (n - 1)) / n
+      const rowH = Math.min(Math.max(share, btnH), SENDER_ROW_MAX)
+      for (let i = 0; i < n; i++) {
         const index = i
-        items.push(this.addSenderRow(host, p.senders[i], innerW, () =>
+        items.push(this.addSenderRow(host, p.senders[i], innerW, rowH, () =>
           this._onSenderSelected.invoke(index)
         ))
       }
     } else if (p.kind === "message") {
-      items.push(this.addTextRow(host, p.sender, "Subheadline", 2.0, innerW, TEXT_PRIMARY, false))
-      items.push(this.addTextRow(host, p.text, "Caption", 5.5, innerW, TEXT_SECONDARY, true))
+      const senderH = 2.8
+      const textH = paneH - senderH - btnH - PANE_GAP * 2
+      items.push(this.addTextRow(host, p.sender, "Headline2", senderH, innerW, TEXT_PRIMARY, false))
+      items.push(this.addTextRow(host, p.text, "Body", textH, innerW, TEXT_SECONDARY, true))
       items.push(this.addButtonRow(host, innerW, [
         {label: "Speak", icon: ICON_SPEAK, action: () => this._onSpeak.invoke()},
         {label: "Remove", icon: ICON_REMOVE, action: () => this._onRemove.invoke()},
       ]))
     } else if (p.kind === "draft") {
-      items.push(this.addTextRow(host, p.sender, "Subheadline", 1.8, innerW, TEXT_PRIMARY, false))
-      items.push(this.addTextRow(host, p.said, "Caption", 2.6, innerW, TEXT_SECONDARY, true))
-      items.push(this.addTextRow(host, p.draft, "Body", 4.0, innerW, TEXT_DRAFT, true))
+      // The gist and the rewrite are the same size; the rewrite is the bolder
+      // Callout in mint, the gist the lighter Body. Dimming the gist is what
+      // the old card did and it is exactly what does not survive an additive
+      // display, so the difference is weight and hue only.
+      const senderH = 2.6
+      const saidH = 3.2
+      const draftH = paneH - senderH - saidH - btnH - PANE_GAP * 3
+      items.push(this.addTextRow(host, p.sender, "Headline2", senderH, innerW, TEXT_PRIMARY, false))
+      items.push(this.addTextRow(host, p.said, "Body", saidH, innerW, TEXT_SECONDARY, true))
+      items.push(this.addTextRow(host, p.draft, "Callout", draftH, innerW, TEXT_DRAFT, true))
       items.push(this.addButtonRow(host, innerW, [
         {label: "Send", icon: ICON_SEND, action: () => this._onSend.invoke()},
         {label: "Remove", icon: ICON_REMOVE, action: () => this._onRemove.invoke()},
       ]))
     } else {
-      items.push(this.addTextRow(host, this.sentLabel, "Headline1", 3.0, innerW, TEXT_DRAFT, false))
-      items.push(this.addTextRow(host, p.draft, "Caption", 4.0, innerW, TEXT_SECONDARY, true))
+      const sentH = 4.6
+      items.push(this.addTextRow(host, this.sentLabel, "Headline1", sentH, innerW, TEXT_DRAFT, false))
+      items.push(
+        this.addTextRow(host, p.draft, "Body", paneH - sentH - PANE_GAP, innerW, TEXT_SECONDARY, true)
+      )
     }
 
     flex.addItems(items)
@@ -433,27 +511,53 @@ export class MessyHandsCardUI extends BaseScriptComponent {
     return item
   }
 
-  /** A full-width sender row - a big target that opens that person's message. */
+  /**
+   * A full-width sender row - a big target that opens that person's message.
+   * `heightCm` is shared out by the caller from the pane's spare height, so the
+   * rows grow past the 4 cm floor rather than leaving dead space under them.
+   */
   private addSenderRow(
     parent: SceneObject,
     sender: string,
     widthCm: number,
+    heightCm: number,
     action: () => void
   ): FlexItem {
     const so = this.obj(parent, "Sender-" + sender)
     this.liftInZ(so, LAYOUT_Z_LIFT)
     const btn = so.createComponent(Button.getTypeName()) as Button
-    btn.size = new vec3(widthCm, this.buttonHeightCm, 1)
+    btn.size = new vec3(widthCm, heightCm, 1)
     const ec = so.createComponent(ElementContent.getTypeName()) as ElementContent
     ec.text = sender
-    ec.textSize = roleSize("Callout")
+    ec.textSize = roleSize("Headline2")
     ec.contentAlignment = "center"
+    this.whitenLabel(ec)
     const item = so.createComponent(FlexItem.getTypeName()) as FlexItem
     item.overrideWidth = widthCm
-    item.overrideHeight = this.buttonHeightCm
+    item.overrideHeight = heightCm
     item.alignSelf = FlexAlignSelf.Stretch
     btn.onTriggerUp.add(() => action())
     return item
+  }
+
+  /**
+   * Takes a UI Kit label to pure white.
+   *
+   * ElementContent resolves its text colour from the active theme, which paints
+   * it at 0.85 grey - fine on a backlit screen, a visible step down from the
+   * card's own white text on an additive display. The two fields behind the
+   * override are Inspector @inputs with no public setter, so they are written
+   * directly and then committed through the public markColorsDirty(), which
+   * exists for exactly this (re-resolve after a per-instance colour change).
+   */
+  private whitenLabel(ec: ElementContent): void {
+    const fields = ec as unknown as {
+      _useTextColorOverride: boolean
+      _textColorOverride: vec4
+    }
+    fields._useTextColorOverride = true
+    fields._textColorOverride = TEXT_CONTROL
+    ec.markColorsDirty()
   }
 
   /** The action row along the card's lower edge, inside the card. */
@@ -500,10 +604,12 @@ export class MessyHandsCardUI extends BaseScriptComponent {
     btn.size = new vec3(widthCm, this.buttonHeightCm, 1)
     const ec = so.createComponent(ElementContent.getTypeName()) as ElementContent
     ec.leadingIcon = icon
+    ec.leadingIconSize = CONTROL_ICON_CM
     ec.text = label
     ec.textSize = roleSize("Button")
     ec.contentAlignment = "center"
     ec.spacing = 0.5
+    this.whitenLabel(ec)
     const item = so.createComponent(FlexItem.getTypeName()) as FlexItem
     item.overrideWidth = widthCm
     item.overrideHeight = this.buttonHeightCm

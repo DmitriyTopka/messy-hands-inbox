@@ -156,3 +156,122 @@ the LEAF MCP tools.
 | `Assets/Scenarios/*.ts` | the LEAF suite |
 | `Assets/GeneratedSFX/MessageChime.wav` | 0.9 s two-note chime, generated locally |
 | `Assets/Icons/*.png` | play_arrow, group, mic, send, delete, circle |
+
+## Design fix 2 - the card text was too small and too pale
+
+Reported after standing in the preview: from where the user actually stands the
+card's text could not be read.
+
+### What was wrong
+
+Two separate mistakes, both in `MessyHandsCardUI.ts`.
+
+**Size.** The card sized its text off the SnapOS system scale, which is
+calibrated for reading at z = -110 cm - a panel held up near the face - and then
+multiplied every size by 85/110 to preserve the same *visual angle* at the
+card's own distance. That reasoning is backwards for this card. A panel you hold
+up gets your full attention; a card lying on a counter gets a glance, side-on,
+while your eyes are really on the dough. It needs a bigger visual angle than a
+held panel, not the same one. The body roles landed at a 0.69 cm em.
+
+**Contrast.** Secondary text ran at 0.7 alpha and the reply draft at a mid-green.
+The display is additive - it only adds light to what the eye already sees - so
+alpha below 1 is a straight subtraction of contrast against a lit kitchen, with
+nothing gained. UI Kit's own button and row labels resolve from the theme at
+0.85 grey, a visible step below the card's white.
+
+### What changed
+
+| | Before | After |
+|---|---|---|
+| Text scale | system size x 85/110 | system size x 1.45, no distance shrink |
+| Rendered glyph height | - | **1.88x** every role |
+| Roles in use | Caption (38), Body (39) | Body / Callout (57), Headline2 (70), Headline1 (78) |
+| Secondary text | white at 0.7 alpha | `(0.95, 0.96, 1)` at full alpha |
+| Reply draft | `(0.60, 0.92, 0.72)` | `(0.72, 1.00, 0.84)` |
+| Button + row labels | theme grey 0.85 | pure white, via `markColorsDirty()` |
+| Button icons | 1.5 cm | 2.4 cm |
+| Card | 22 x 20 cm | 22 x **24** cm |
+| Status row | 2.6 cm, Subheadline | 3.4 cm, Headline2 |
+| Sender rows | 4.4 cm | **5.5 cm** (they share out the pane's spare height) |
+| Pane rows | fixed heights | derived from card height, so the button row always sits on the lower edge |
+
+Hierarchy on the card is now carried by size, weight and hue. Nothing is faded.
+
+**Width and position were deliberately not touched.** The card stays 22 cm wide
+at x = 26, which is the footprint the first build measured as in-view next to the
+dough. Only the height grew, and it grew along the card's own 50-degree pitch:
+the top edge rises 1.3 cm and moves 1.5 cm further away, the bottom edge drops
+to 0.8 cm above the counter surface. Criterion 2 re-checks all of that against
+live bounds and still passes.
+
+**One line of preview text was shortened**, per the instruction to cut text
+rather than type. The draft pane's gist line was `You said: <gist>`; at the new
+size that label cost a whole wrapped line and pushed the rewrite under the button
+row. It now reads `"<gist>"` in quotes. Same meaning, two characters. Nothing
+else was cut - at the new size the full message bodies and replies still fit.
+
+The interaction flow is unchanged: same buttons, same order, same states.
+
+### A regression this caused, found and fixed
+
+`reach-standing-user` started failing intermittently - 2 passes in 4 runs -
+with `Expected: "senders" - Received: "ready"`. The IK arm converged on Start,
+then could not acquire the "Who wrote" button that replaced it. The log showed
+why: `PhysicalInteractionProvider.clearRecentlyEndedStateIfNeeded` throwing
+`Object is null` every frame.
+
+This is the same class of bug `REBUILD_DELAY_S` already existed to prevent, but
+0.12 s was tuned against the **scripted** interactor. A physical hand - real or
+IK - holds a "recently ended" reference to the button it just pinched for longer
+than that, and destroying the button inside that window leaves SIK throwing
+every frame, which blocks the hand from acquiring the replacement. The scripted
+path never saw it because it does not keep that state.
+
+`REBUILD_DELAY_S` is now 0.35 s. Still reads as instant. 4 for 4 after the change
+(3 confirmation runs plus the final suite run), against 2 of 4 before.
+
+### LEAF results after the fix
+
+All six scenarios re-run against the final build. **All six pass.**
+
+| Scenario | Result |
+|---|---|
+| `criterion-1-status-dot` | PASS |
+| `criterion-2-card-placement` | PASS |
+| `criterion-3-who-wrote` | PASS |
+| `criterion-4-reply-and-send` | PASS |
+| `criterion-5-remove` | PASS |
+| `reach-standing-user` | PASS |
+
+Criterion 4 passes unchanged by the quotes edit: it asserts the gist is *present*
+in the draft pane, and it still is, as a substring.
+
+### Walkthrough
+
+`devpost/walkthrough/` holds one runtime capture per step, all from the final
+build, camera at the user's eye position (0, 0, 0) glancing down-right at the
+card with the dough in frame.
+
+| File | What it shows |
+|---|---|
+| `01_start.png` | grey dot, "3 messages", the Mom snippet, Start |
+| `02_ready.png` | after Start: green dot, "Who wrote" |
+| `03_who_wrote.png` | Mom / Alex / Work chat, three 5.5 cm rows |
+| `04_open_message.png` | Mom's full message, three lines, Speak + Remove |
+| `05_draft.png` | the quoted gist in white over the rewrite in mint, Send + Remove |
+| `06_sent.png` | "Sent" over the reply that went |
+| `07_removed.png` | after Remove: "2 messages", now naming Alex |
+
+`06_sent.png` needed `sentHoldSeconds` raised to 8 for the capture, because the
+screenshot round-trip is longer than the 2 s the card actually holds that state.
+It was set back to 2 immediately after. The pane content is exactly what a user
+sees; only the dwell differed.
+
+### Still feel unproven
+
+Everything the first build listed as feel unproven stays unproven. The text is
+now demonstrably larger and lighter *in the preview*, which is a simulated
+display: whether near-white at this size is comfortable against a bright real
+kitchen, through real additive optics, is the kind of thing only the glasses can
+answer.
