@@ -1,0 +1,66 @@
+- !<AssetImportMetadata/d6949918-a1e9-4aeb-a8c3-b28b772dfad7>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 30d106e8-7fb8-4932-b632-cc0d993870cb
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 30d106e8-7fb8-4932-b632-cc0d993870cb
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> f85b6886-d0c2-426c-b6aa-1c63fb450d65
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/f85b6886-d0c2-426c-b6aa-1c63fb450d65>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: f8ff9b20-55b4-436f-815f-41606ead3761
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    buttonHeightCm: false
+    cardHeightCm: false
+    cardWidthCm: false
+    idleDotColor: false
+    readyDotColor: false
+    sentLabel: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - cardWidthCm: !<float> 22.000000
+      cardHeightCm: !<float> 20.000000
+      buttonHeightCm: 4.400000
+      idleDotColor: !<Vec4> {x: 0.620000, y: 0.640000, z: 0.680000, w: 1.000000}
+      readyDotColor: !<Vec4> {x: 0.350000, y: 0.920000, z: 0.480000, w: 1.000000}
+      sentLabel: Sent
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">MessyHandsCardUI - the message card on the counter</span>"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">Settings</span>"}'
+    - '// @ui {"widget":"group_start", "label":"Settings"}'
+    - "// @input float cardWidthCm = 22 {\"hint\":\"Card width in cm. The brief's default is 22 cm.\", \"widget\":\"slider\", \"min\":14, \"max\":32, \"step\":0.5}"
+    - '// @input float cardHeightCm = 20 {"hint":"Card height in cm. 20 cm fits three 4 cm sender rows plus the status line.", "widget":"slider", "min":12, "max":28, "step":0.5}'
+    - '// @input float buttonHeightCm = 4.4 {"hint":"Height of every tappable target in cm. The brief asks for at least 4 cm.", "widget":"slider", "min":3, "max":7, "step":0.1}'
+    - '// @input vec4 idleDotColor = "{0.62,0.64,0.68,1}" {"hint":"Status dot colour before the Lens is started (neutral grey).", "widget":"color"}'
+    - '// @input vec4 readyDotColor = "{0.35,0.92,0.48,1}" {"hint":"Status dot colour once the Lens is ready (green).", "widget":"color"}'
+    - '// @input string sentLabel = "Sent" {"hint":"Text shown on the card after a reply is sent."}'
+    - '// @ui {"widget":"group_end"}'

@@ -4,6 +4,10 @@
     - !<own> 00000000-0000-0065-0000-000000000064
     - !<own> 0005641c-028d-459a-0000-000000014b4d
     - !<own> f5d74682-203a-4970-81ea-9fa7b88c96bb
+    - !<own> 71cb07ce-1f37-4e97-a672-faf699e7b225
+    - !<own> 70f8f7a7-ffe4-47fe-b182-88395a28a570
+    - !<own> 4e928110-8af6-4506-9c56-654769bbf43b
+    - !<own> b36c515a-15ea-4286-a90f-03a978029940
   layers: !<Layers/267ee9a7-aff2-4f9d-9a49-f71214747d03>
     userLayers:
       - id: 1
@@ -236,6 +240,26 @@
     []
   Components:
     []
+- !<RenderMeshVisual/081e297e-9973-417d-8e53-0f5c031aa035>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> c3f748dd-20ef-4faa-bc38-b650a3e8c58b
+  Mesh: !<reference> cbee2e12-0e49-4ffa-b894-6a570e1e4b3a
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
 - !<ScriptComponent/0847d2bb-a13f-4c4a-a404-169f67308f6f>
   PrefabRemaps:
     []
@@ -513,6 +537,41 @@
     []
   Components:
     []
+- !<SceneObject/1c76045e-672b-4176-96e6-4d4a81c0afb3>
+  PrefabRemaps:
+    []
+  Name: ChimeAudio
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> a5d8b29c-2e6d-4ce8-af94-a9b17cff532a
+- !<RenderMeshVisual/1ef4d5c4-8949-4629-8cd6-d6b1de5580d3>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 6d4f8e58-8dea-4f77-b8c7-fa63588c8c17
+  Mesh: !<reference> 43503f76-c779-4be8-a4c9-04985b74f9cf
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
 - !<RenderMeshVisual/1f969daa-5809-4500-b314-98d91ccba131>
   PrefabRemaps:
     []
@@ -946,6 +1005,36 @@
     []
   Components:
     - !<own> 5f153ad7-2baa-4fd9-a298-0dcfad86da3b
+- !<SceneObject/4e928110-8af6-4506-9c56-654769bbf43b>
+  PrefabRemaps:
+    []
+  Name: LeafIndex
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 585e9ab2-b4d1-422d-a407-96cdff1d1fc3
+- !<SceneObject/52c31079-5b61-4eca-8979-b4ff22292bb4>
+  PrefabRemaps:
+    []
+  Name: CounterBody
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: -47.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 110.000000, y: 86.000000, z: 52.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 1ef4d5c4-8949-4629-8cd6-d6b1de5580d3
 - !<SceneObject/52ecefe4-5642-445a-ad16-52ce818076bc>
   PrefabRemaps:
     []
@@ -976,6 +1065,42 @@
     - !<own> 46b79537-a269-46f1-9483-500d7a4170d6
   Components:
     []
+- !<RenderMeshVisual/57308c67-dc5a-4ec2-93ef-8e3fb11bd0ef>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> ad9918cf-2ffd-49a9-a882-6af1eddd79d2
+  Mesh: !<reference> 43503f76-c779-4be8-a4c9-04985b74f9cf
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<ScriptComponent/585e9ab2-b4d1-422d-a407-96cdff1d1fc3>
+  PrefabRemaps:
+    []
+  Name: LeafIndex
+  Enabled: true
+  ScriptAsset: !<reference> 317e32a5-0518-473b-b778-39f20d685f96
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      {}
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/58ef319f-850e-40dd-8295-e6dc36ab4854>
   PrefabRemaps:
     []
@@ -1015,6 +1140,23 @@
   ScriptTypes:
     "":
       {}
+- !<SceneObject/60bf81fa-9ebe-402f-831a-1a395e739b26>
+  PrefabRemaps:
+    []
+  Name: CounterStandIn
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: -70.000000, z: -55.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> e8f2d35a-4e3a-4c52-81c0-d860e77bef1a
+    - !<own> 52c31079-5b61-4eca-8979-b4ff22292bb4
+    - !<own> e8ab0dcb-39f6-49e9-b772-ac54f2959229
+  Components:
+    []
 - !<ScriptComponent/62967490-d66e-4479-8829-e5c9da5b5b57>
   PrefabRemaps:
     []
@@ -1231,6 +1373,39 @@
     - !<own> 6dbaab8f-d98a-4f36-b836-1d7c8a0cca87
   Components:
     []
+- !<SceneObject/70f8f7a7-ffe4-47fe-b182-88395a28a570>
+  PrefabRemaps:
+    []
+  Name: AiPreviewAgent Handler
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> e19a281f-913f-4587-8171-e1b1363abda4
+- !<SceneObject/71cb07ce-1f37-4e97-a672-faf699e7b225>
+  PrefabRemaps:
+    []
+  Name: MessyHandsInbox
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 60bf81fa-9ebe-402f-831a-1a395e739b26
+    - !<own> 93d8ac57-a886-428d-8548-75b4592a278a
+    - !<own> 1c76045e-672b-4176-96e6-4d4a81c0afb3
+    - !<own> 9e2a1b73-f6b3-4d2b-9b1c-8b476660b4d5
+  Components:
+    - !<own> fbcf4ef9-81e7-4ca7-b4d8-4b00faf11108
 - !<SceneObject/71e47ae8-e7da-438c-be22-b495f0fbd4fe>
   PrefabRemaps:
     []
@@ -1340,6 +1515,22 @@
     - !<own> 3b4f5057-b516-4d3b-9c8d-14c81af2f505
   Components:
     []
+- !<ScriptComponent/7c934492-8f70-49b3-b259-58ca0f719b47>
+  PrefabRemaps:
+    []
+  Name: MessagingBridge
+  Enabled: true
+  ScriptAsset: !<reference> 9aa407db-2872-4afc-a162-cf7faf2a0f29
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      {}
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/7e2075c6-0882-4275-8365-16a03da73298>
   PrefabRemaps:
     []
@@ -1355,6 +1546,23 @@
     - !<own> 58ef319f-850e-40dd-8295-e6dc36ab4854
   Components:
     []
+- !<ScriptComponent/7e7c2f81-c200-46fd-8c78-a9d2acbf568d>
+  PrefabRemaps:
+    []
+  Name: MessyHandsVoiceController
+  Enabled: true
+  ScriptAsset: !<reference> 0e0afc5f-ce6e-465b-bf49-5feba19a0a8b
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      main: !<MappingBased.AssignableType_1> fbcf4ef9-81e7-4ca7-b4d8-4b00faf11108
+      enableVoice: false
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/7fb3591f-54a2-4aee-b07d-fd10d56538c8>
   PrefabRemaps:
     []
@@ -1546,6 +1754,21 @@
     - !<own> 8cb3dd13-6ebf-41e6-9a23-94a69dd96f87
   Components:
     []
+- !<SceneObject/93d8ac57-a886-428d-8548-75b4592a278a>
+  PrefabRemaps:
+    []
+  Name: MessageCard
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 26.000000, y: -61.500000, z: -50.000000}
+    Rotation: {x: -50.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> f6253ae3-684c-4225-9479-c770cc99c23e
 - !<SceneObject/9468c53c-f76f-49b7-8a49-b5ec6af1c5a3>
   PrefabRemaps:
     []
@@ -1608,6 +1831,21 @@
   ScriptTypes:
     "":
       {}
+- !<SceneObject/9e2a1b73-f6b3-4d2b-9b1c-8b476660b4d5>
+  PrefabRemaps:
+    []
+  Name: VoiceCommands
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 7e7c2f81-c200-46fd-8c78-a9d2acbf568d
 - !<SceneObject/9e373d68-993f-4c8f-83a0-6644f1d9fefd>
   PrefabRemaps:
     []
@@ -1672,6 +1910,22 @@
     - !<own> b93dfa60-41bd-4999-ac0f-4b2f1df2bdaf
   Components:
     []
+- !<ScriptComponent/a5d8b29c-2e6d-4ce8-af94-a9b17cff532a>
+  PrefabRemaps:
+    []
+  Name: MessyHandsAudioController
+  Enabled: true
+  ScriptAsset: !<reference> e7b2c3b3-0e29-475f-9ea7-b917673ef369
+  ScriptInputsDefault:
+    chimeVolume: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      chimeVolume: 0.500000
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/a6305e2f-5379-4729-800a-d5ecae615edc>
   PrefabRemaps:
     []
@@ -1792,6 +2046,21 @@
     - !<own> 3de2c7ea-1525-465a-9056-68565a4014a7
   Components:
     []
+- !<SceneObject/b36c515a-15ea-4286-a90f-03a978029940>
+  PrefabRemaps:
+    []
+  Name: LEAF Plugin Bridge
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 7c934492-8f70-49b3-b259-58ca0f719b47
 - !<SceneObject/b463be13-dddb-4b36-a3dd-c344bd3d8ef5>
   PrefabRemaps:
     []
@@ -2260,6 +2529,22 @@
   BlendNormals: false
   BlendShapes:
     {}
+- !<ScriptComponent/e19a281f-913f-4587-8171-e1b1363abda4>
+  PrefabRemaps:
+    []
+  Name: AgentInspectScript
+  Enabled: true
+  ScriptAsset: !<reference> 0b25079c-f5bf-4c6d-96c4-f43b89dfa213
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      {}
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/e2ba526d-75d1-466b-86a5-9cd7c42dca84>
   PrefabRemaps:
     []
@@ -2315,6 +2600,36 @@
     - !<own> 0f983d21-20bc-4d89-a991-fbb95bacbd64
   Components:
     []
+- !<SceneObject/e8ab0dcb-39f6-49e9-b772-ac54f2959229>
+  PrefabRemaps:
+    []
+  Name: DoughBall
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 10.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 20.000000, y: 20.000000, z: 20.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 081e297e-9973-417d-8e53-0f5c031aa035
+- !<SceneObject/e8f2d35a-4e3a-4c52-81c0-d860e77bef1a>
+  PrefabRemaps:
+    []
+  Name: CounterTop
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: -2.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 120.000000, y: 4.000000, z: 60.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 57308c67-dc5a-4ec2-93ef-8e3fb11bd0ef
 - !<SceneObject/e9454e66-5d09-4a8a-bcd7-dea762326a48>
   PrefabRemaps:
     []
@@ -2530,6 +2845,32 @@
     - !<own> 9468c53c-f76f-49b7-8a49-b5ec6af1c5a3
   Components:
     []
+- !<ScriptComponent/f6253ae3-684c-4225-9479-c770cc99c23e>
+  PrefabRemaps:
+    []
+  Name: MessyHandsCardUI
+  Enabled: true
+  ScriptAsset: !<reference> 30d106e8-7fb8-4932-b632-cc0d993870cb
+  ScriptInputsDefault:
+    cardWidthCm: true
+    cardHeightCm: true
+    buttonHeightCm: true
+    idleDotColor: true
+    readyDotColor: true
+    sentLabel: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      cardWidthCm: !<float> 22.000000
+      cardHeightCm: !<float> 20.000000
+      buttonHeightCm: 4.400000
+      idleDotColor: !<Vec4> {x: 0.620000, y: 0.640000, z: 0.680000, w: 1.000000}
+      readyDotColor: !<Vec4> {x: 0.350000, y: 0.920000, z: 0.480000, w: 1.000000}
+      sentLabel: Sent
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/f666b5eb-6a03-4db0-9d84-5b34c6e8905a>
   PrefabRemaps:
     []
@@ -2575,6 +2916,26 @@
     - !<own> a7526b33-fca3-4f28-8e32-b0e9aa13c4b4
   Components:
     []
+- !<ScriptComponent/fbcf4ef9-81e7-4ca7-b4d8-4b00faf11108>
+  PrefabRemaps:
+    []
+  Name: MessyHandsMain
+  Enabled: true
+  ScriptAsset: !<reference> aa1ce1d0-56ab-4180-b697-4c55ded92fba
+  ScriptInputsDefault:
+    sentHoldSeconds: true
+    debugColliders: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      card: !<MappingBased.AssignableType_1> f6253ae3-684c-4225-9479-c770cc99c23e
+      audio: !<MappingBased.AssignableType_2> a5d8b29c-2e6d-4ce8-af94-a9b17cff532a
+      sentHoldSeconds: !<float> 2.000000
+      debugColliders: false
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/fcc185fc-4e88-4e9e-9c71-40bd83b1b0ed>
   PrefabRemaps:
     []

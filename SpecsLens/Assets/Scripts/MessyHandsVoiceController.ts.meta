@@ -1,0 +1,58 @@
+- !<AssetImportMetadata/e63cbe63-0fd7-4e44-951e-74387f48fde5>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 0e0afc5f-ce6e-465b-bf49-5feba19a0a8b
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 0e0afc5f-ce6e-465b-bf49-5feba19a0a8b
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> ed9532e7-252a-4fcb-95be-3ec4af055ede
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/ed9532e7-252a-4fcb-95be-3ec4af055ede>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: 97c88911-b8d4-4c63-80cf-f06e829668ab
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    enableVoice: false
+    main: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - main: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      enableVoice: true
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">MessyHandsVoiceController - optional hands-free commands</span>"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">References</span>"}'
+    - '// @ui {"widget":"group_start", "label":"References"}'
+    - '// @input AssignableType_1 main {"hint":"The main script whose commands spoken words map to. Wired by the bootstrap."}'
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">Settings</span>"}'
+    - '// @ui {"widget":"group_start", "label":"Settings"}'
+    - "// @input bool enableVoice {\"hint\":\"Listen for spoken commands. Off means buttons only. Voice never replaces a button. Needs Lens Studio sign-in: without it the preview's VoiceML token fetch returns 401 on a loop.\"}"
+    - '// @ui {"widget":"group_end"}'
