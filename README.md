@@ -6,7 +6,7 @@ You're cooking. Your hands are in dough or minced meat, and three people text yo
 
 Built for [Learn AR with SPECS](https://learn-specs.devpost.com/) in Lens Studio 5.24, shown in the Lens Studio preview (no Spectacles device was used).
 
-Demo video: see the Devpost page.
+Demo video: https://youtu.be/zjj550QKkAc
 
 ## What it does
 
