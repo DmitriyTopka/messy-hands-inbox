@@ -1,3 +1,5 @@
 video/raw/
 video/build/
 SpecsLens/tempAssetGen/
+devpost/build_log_*.jsonl
+devpost/build_err_*.txt
