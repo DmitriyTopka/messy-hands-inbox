@@ -1,0 +1,3 @@
+h1	First I planned it with the plan-lens interview. Where the card sits, how I act on it, and five checks it must pass.
+h2	Then Claude Code with Snap's CLAD agents built it in Lens Studio, over MCP. The agent pinches the buttons itself, takes a screenshot, and fixes what it sees.
+h3	After the card got taller, one LEAF test failed. A real regression. The agent fixed it and re-ran the suite. Six of six pass.

@@ -275,3 +275,302 @@ now demonstrably larger and lighter *in the preview*, which is a simulated
 display: whether near-white at this size is comfortable against a bright real
 kitchen, through real additive optics, is the kind of thing only the glasses can
 answer.
+
+---
+
+# Round 2 (06.11)
+
+Three things changed: the inbox now remembers across Lens restarts, the LEAF
+suite went from 6 scenarios to 23, and the counter and dough are textured
+instead of flat-coloured. The voice path was not touched.
+
+## 1. Memory between sessions
+
+The inbox writes what you did to `global.persistentStorageSystem.store` and
+reads it back on the next start. Two string arrays, two keys:
+
+```
+messyhands.sent     ids you replied to
+messyhands.removed  ids you threw away
+```
+
+New file `Assets/Scripts/MessyHandsMemory.ts` owns both. `SAMPLE_MESSAGES`
+gained a stable `id` per message (`mom-sunday`, `alex-keys`, `work-standup`),
+deliberately not the sender name, because the real product would have several
+messages from one person.
+
+**The two sets mean different things, on purpose.** A removed message never
+comes back. A replied-to message *does* come back, marked "replied" on its
+sender row when you reopen it. Nothing is really sent in this demo, so quietly
+deleting a message you only answered would destroy a thread you can still read,
+while a message you deliberately cleared has to stay gone or "remove" means
+nothing.
+
+`resetDemo()` clears both keys, with `remove()` and not `clear()`: `clear()`
+wipes the whole data store, which on a real device is shared with anything else
+the Lens ever saved. Reset means forget this demo, not forget everything.
+
+**The visible hint.** When a previous session is remembered, the idle card adds
+one mint line above the snippet: `Last time: 1 replied, 1 cleared`. Idle only.
+Once you have pinched Start the count line is the live truth and the
+explanation is noise. It wraps, and the wording was shortened from "From last
+time:" to "Last time:" after the longer version rendered against the plate's
+right edge in the preview.
+
+**Proven by a real restart, not only by a test.** `memory-survives-refresh`
+drives a send and a remove, reads `persistentStorageSystem.store` back, and
+re-runs the start-time restore over it. It then leaves that state in the store
+on purpose. Refreshing the preview afterwards logs:
+
+```
+[MessyHandsMain] idle with 2 messages waiting; remembered 1 replied, 1 cleared
+```
+
+That is a genuine process restart reading genuine persisted state, captured in
+`walkthrough_v2/04_memory_after_restart.png`. A LEAF scenario lives inside the
+running Lens and cannot restart it, so this last step is a manual check, and it
+is recorded here rather than claimed by a test.
+
+A runtime with no persistent storage degrades to a Lens that forgets, never one
+that fails to start: `deviceStore()` returns null and every call becomes a
+no-op. There is also an Inspector switch, `rememberBetweenSessions`, default on.
+
+## 2. LEAF: 6 scenarios to 23
+
+Registered in `Assets/Scenarios/LeafIndex.ts` in four groups plus the tour.
+
+| id | what it proves |
+|---|---|
+| `criterion-1-status-dot` | grey dot at start, green after Start |
+| `criterion-2-card-placement` | card right of and below the dough, reads "3 messages", does not cover it |
+| `criterion-3-who-wrote` | three sender names, pinching one opens that message |
+| `criterion-4-reply-and-send` | Speak shows the rewrite, Send shows it sent |
+| `criterion-5-remove` | Remove drops the message, card reads one fewer |
+| `flow-empty-inbox` | removing all three leaves "No messages" and no rows to press |
+| `flow-start-twice` | Start is gone after the first press, and the command behind it is a no-op |
+| `flow-remove-while-draft-open` | Remove works with a draft on screen; the draft goes with it |
+| `flow-sent-times-out` | "Sent" expires back to the summary with nothing pressed |
+| `flow-wrong-phase-ignored` | every command is refused outside its phase, in all six phases |
+| `flow-reset-twice` | reset is idempotent, twice over and after real damage |
+| `flow-long-message-truncated` | a long body is cut so the button row stays on the card |
+| `flow-inbox-logic` | the inbox's counting, opening, closing and removing rules, no scene |
+| `memory-survives-refresh` | a reply and a removal reach real storage and restore from it |
+| `memory-cleared-by-reset` | reset wipes the store, so the next start is a fresh three |
+| `memory-store-roundtrip` | write, read back, forget, and the no-storage case, over a fake store |
+| `memory-removed-vs-replied` | removed stays gone, replied comes back marked |
+| `design-readability` | every line on the card, in all seven pane states, is big enough and near-white |
+| `design-target-size` | every tappable control is at least 4 cm, measured off its collider |
+| `design-card-never-covers-dough` | the card cannot cover the work from any head angle |
+| `reach-standing-user` | a standing user's IK arm converges on the card's controls |
+| `reach-seated-user` | a seated user can reach and drive the card with the kitchen 40 cm higher |
+| `demo-tour` | the whole walkthrough in one filmable pass, with real pauses |
+
+Six of these need no scene at all (`flow-long-message-truncated`,
+`flow-inbox-logic`, `memory-store-roundtrip`, `memory-removed-vs-replied` are
+pure logic over `MessyHandsInbox` and `MessyHandsMemory`); they still run
+through LEAF so the suite is one command and one report.
+
+### Results
+
+Three full runs back to back, no code changed between them, Lens Studio
+preview. **69 of 69 passed.** Raw per-scenario output with timestamps in
+`devpost/leaf_runs_0611.txt`. Every verdict in that file came back from the MCP
+tool call; none had to be recovered from the log.
+
+```
+RUN 1   23 scenarios   23 passed, 0 failed   14:27:02 -> 14:32:05
+RUN 2   23 scenarios   23 passed, 0 failed   14:32:14 -> 14:37:27
+RUN 3   23 scenarios   23 passed, 0 failed   14:37:36 -> 14:42:36
+```
+
+### Numbers the suite measures and prints
+
+```
+readability   28 lines across 7 pane states; smallest glyph 1.29 cm
+              = 0.89 deg at the measured 83.4 cm eye-to-card distance;
+              dimmest colour channel 0.72, every line at full alpha
+target size   9 controls across 5 interactive panes; smallest 9.40 x 4.40 cm
+              against the brief's 4 cm floor; card plate 22.0 x 24.0 cm
+occlusion     dough azimuth -12.4..+12.4, card +14.2..+42.2, gap 1.80 deg
+              nearest dough 68.1 cm, nearest card 81.4 cm
+seated reach  furthest idle control 43.9 cm, furthest sender row 53.3 cm
+              from a modelled seated shoulder, against a 62 cm arm
+```
+
+### A correction to Round 1
+
+Round 1 claimed "26 cm keeps the whole card and the dough visible together".
+**That is wrong**, and `design-card-never-covers-dough` is what caught it.
+Measured from the authored eye against the preview camera's own field of view:
+
+```
+dough    24.8 deg of azimuth
+card     28.0 deg
+display  32.3 x 36.6 deg
+together 54.6 deg
+```
+
+54.6 degrees does not fit in 32.3. The whole dough and the whole card cannot be
+inside the glasses at the same time; the user glances between them. The
+per-pose numbers the scenario prints:
+
+```
+straight down at the dough (yaw 0)    dough 100% in view, card   7%
+down and slightly right    (yaw 8)    dough  83%,         card  35%
+half way to the card       (yaw 17)   dough  47%,         card  68%
+glancing at the card       (yaw 28)   dough   2%,         card 100%
+head up, eyes on the work  (yaw 4)    dough  99%,         card  21%
+```
+
+This is not fixable by nudging the card: a 22 cm card beside a 20 cm dough
+cannot both fit in a 32 degree window at 85 cm at any separation that still
+leaves a gap between them. Either the card gets narrower, or the two get
+closer and the gap goes, or the glance stays. **The card was NOT moved** -
+that is a design decision for a human, not something to change quietly, and
+the existing demo video and screenshots are built on the current placement.
+
+What does hold, and is asserted: the card never covers the work from any head
+angle (occlusion depends only on direction from the eye, not on where the head
+points); there is a head angle holding the whole dough and one holding the
+whole card; and with eyes on the dough the card's near edge is still 1.93 deg
+inside the display edge, so you can see the card is there without turning your
+head. The 54.6 deg figure is asserted too, as a recorded measurement rather
+than a goal, so it cannot drift unnoticed. If that assertion ever fails, the
+placement improved and this section needs rewriting.
+
+### One product bug the new tests found
+
+`commandOpenSender()` returned `true` whenever it *recognised* a sender name,
+even when the phase guard had refused to open anything. Saying "Mom" at the
+idle card reported success and did nothing. Nothing depended on that return
+yet, which is exactly why it survived: the voice controller ignores it. Fixed
+to report whether a message was actually opened, and `commandOpenIndex()` now
+returns a boolean too.
+
+### Four test-harness bugs worth remembering
+
+1. **A pinch can hang the whole suite forever.** LEAF's `trigger()` awaits
+   `onHoverEnter` with no timeout of its own, so a control that never receives a
+   hover stalls the scenario, and everything queued behind it, indefinitely. One
+   run sat there eleven minutes with no verdict and had to be killed by hand.
+   Every tap now goes through a 6 s `withTimeout`, so a stuck pinch fails
+   loudly instead of hanging.
+2. **A control can exist before it can be hit.** UI Kit's `Button` creates its
+   `Interactable` first and its collider child a beat later. `waitForControl`
+   was handing back controls with no collider - which can be neither hovered nor
+   counted as a touch target. That single race caused both the "never received a
+   hover" hangs and `design-target-size` reporting "idle control count Expected
+   1, Received 0". It now waits for a control that is stable across two polls
+   *and* has a collider.
+3. **Geometry tests were measuring from the preview camera.** Moving the camera
+   to take a screenshot silently re-measured the whole scene: the dough's
+   azimuth span moved from `-12.4..12.4` to `-25.8..3.0` and failed an
+   occlusion assertion that had nothing wrong with it. The design claims are
+   about the authored eye at the origin, so that is what they measure from now,
+   with the live camera position logged alongside. Verified by re-running with
+   the camera at `(-30, 25, 40)`: identical numbers.
+4. **A test can be too slow to see what it tests.** After the tap settle went
+   up, `demo-tour` checked the "Sent" state *after* the 2 s hold had already
+   expired and reported "ready". Three scenarios now read that pane immediately
+   after the tap, with no pause of their own.
+
+The tap settle is 800 ms, measured rather than guessed: 300 ms (under the
+card's 350 ms rebuild delay) hung outright; 500 ms survived two full suite runs
+and failed on the third.
+
+### What LEAF could not hold
+
+`reach-seated-user` originally tried the Bitmoji IK arm and reported whether it
+converged. It does not converge from the seated pose - it converges standing,
+and not with the card ~20 cm below eye level pitched 50 degrees away. That
+cannot stay in a scenario: LEAF's diagnostic layer records the missed
+interaction and fails the scenario at the end with "Failed interactions
+detected", whatever the scenario itself catches. So an IK reach inside a LEAF
+scenario is necessarily an assertion that it converges. The seated scenario now
+asserts what reproduces (geometric reach, and that the card is drivable at that
+height through Start, "Who wrote" and a sender row) and the IK result is
+recorded here instead of in a red test nobody trusts.
+
+## 3. Scene look
+
+`CounterTop`, `CounterBody` and `DoughBall` keep their names, meshes, sizes and
+transforms. Only their materials changed: `baseColor` to white, `ENABLE_BASE_TEX`
+on, and a texture each.
+
+Three textures, generated by `tools/make_kitchen_textures.py` (numpy + Pillow,
+seeded, deterministic). Nothing downloaded, no asset library, no Snap login, no
+licence to track - the only inputs are the constants in that file.
+
+```
+Assets/Textures/CounterTopWood.png    1024x1024  oak planks, floured centre
+Assets/Textures/DoughFloured.png      1024x512   equirect, floured dough
+Assets/Textures/CounterBodyPaint.png  1024x1024  painted shaker cabinet
+```
+
+**The lighting is painted into the albedo on purpose.** `flat.graphShader` is
+unlit: it samples the base texture and base colour and stops. The two
+LightSource components in the scene do not touch these materials at all. That
+is why the first build looked like flat silhouettes, and why every gradient,
+plank seam and knuckle dimple here is drawn in rather than left to a light.
+
+**Nothing is dark.** The display is additive, so black is transparent and a
+dark texture reads as a hole in the world rather than as shadow. Every value is
+clamped to 0.22-0.88; mean luma is 0.47 for the counter, 0.62 for the dough,
+0.44 for the cabinet, close to the flat colours they replaced, so the scene did
+not get brighter or dimmer overall.
+
+Four things that needed a second pass, all caught by looking at the preview:
+
+- Wood grain at stretch 26 read as cork. Oak needs the fibres an order of
+  magnitude longer than they are wide; it is 140 now.
+- Blurring the flour specks and compensating fully for the blur turned the
+  dusted area into a white starburst. Flour is a haze, not a highlight.
+- The dough's top hemisphere clipped to a flat white blob, because the
+  half-Lambert term peaked above 1.0. It peaks just under 1.0 now.
+- The equirect poles pinched into a visible teat on the sphere, because every
+  column converges on one vertex there. The top and bottom rows are replaced
+  with their own mean and blended back over a few more.
+
+The UVs were verified empirically, not assumed: the stand-in box and sphere
+both carry `texture0`, the box's top face maps 0..1 so the floured patch lands
+exactly where the dough sits, and the planks run along the counter's length.
+`walkthrough_v2/01_standing_view.png` is that check.
+
+## Screenshots
+
+```
+devpost/walkthrough_v2/01_standing_view.png        the kitchen from the user's eye
+devpost/walkthrough_v2/02_card_closeup.png         the card on the wooden counter
+devpost/walkthrough_v2/03_card_senders.png         green dot, three sender rows
+devpost/walkthrough_v2/04_memory_after_restart.png two messages and the memory hint,
+                                                   after a real preview restart
+```
+
+## What is still not proven
+
+**Logic proven** (69 of 69, three consecutive runs): the whole flow; the empty,
+repeated, out-of-phase and timed-out states; truncation; that memory is written,
+restored and cleared; that every control is at least 4 cm and every line of text
+at least 1.29 cm and near-white; that the card never covers the dough from any
+head angle; that a seated user can reach and drive the card.
+
+**Not proven, and not claimed:**
+
+- **Comfort.** Everything about readability and reach is measured in a
+  simulated display. Whether 0.89 degrees of glyph is comfortable through real
+  additive optics against a bright kitchen is a question only the glasses
+  answer. 0.89 deg is below the ~1 deg often quoted for comfortable reading;
+  that is a measurement, not a pass.
+- **Glancing between dough and card.** The 54.6 deg finding says the glance is
+  necessary. Whether it is tolerable while kneading is unknown.
+- **Real hand tracking.** The scripted interactor drives every control. The IK
+  arm converges standing on the full-width buttons, does not converge seated,
+  and the Round 1 note about the sender rows being intermittent still stands.
+- **That the rewrite keeps your meaning.** Still hard-coded pairs. Asserted,
+  never demonstrated.
+- **The real-restart memory check is manual.** The scenario proves the write,
+  the keys and the restore path; the process restart itself is a log line a
+  human read, quoted above.
+- **Voice.** Untouched this round. `VoiceCommands.enableVoice` is still off and
+  still unverified, for the Round 1 reasons.
+- **Nothing ran on a device.** Preview only; no Specs hardware available.

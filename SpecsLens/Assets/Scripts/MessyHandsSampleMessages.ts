@@ -9,6 +9,15 @@
  */
 
 export interface InboxMessage {
+  /**
+   * Stable key for this message, written into persistent storage.
+   *
+   * Deliberately not the sender name: the real product would have several
+   * messages from one person, and a name is also the thing most likely to be
+   * re-worded in a demo. Changing an id here is what loses a remembered state,
+   * so these are frozen.
+   */
+  id: string
   /** Who wrote. */
   sender: string
   /** The message as it arrived. */
@@ -22,18 +31,21 @@ export interface InboxMessage {
 /** Newest first - index 0 is the message named in the compact card. */
 export const SAMPLE_MESSAGES: InboxMessage[] = [
   {
+    id: "mom-sunday",
     sender: "Mom",
     text: "Are you coming on Sunday? I'll make the pie if you are, just tell me by tonight.",
     gist: "yes coming, bringing bread",
     reply: "Yes, I'll be there on Sunday. I'll bring fresh bread with me.",
   },
   {
+    id: "alex-keys",
     sender: "Alex",
     text: "Did you get the keys back from Sam? I need them before Friday.",
     gist: "got them, drop off tomorrow",
     reply: "I have the keys. I'll drop them off with you tomorrow.",
   },
   {
+    id: "work-standup",
     sender: "Work chat",
     text: "Standup moved to 10:30 tomorrow. Can you still make it?",
     gist: "10:30 works",

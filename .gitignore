@@ -3,3 +3,6 @@ video/build/
 SpecsLens/tempAssetGen/
 devpost/build_log_*.jsonl
 devpost/build_err_*.txt
+video/raw_v5/
+video/vo_g*/*_raw.wav
+devpost/devpost_page_backup_*.html

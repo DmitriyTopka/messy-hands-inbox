@@ -19,6 +19,13 @@
 import {MessyHandsAudioController} from "./MessyHandsAudioController"
 import {MessyHandsCardUI} from "./MessyHandsCardUI"
 import {MessyHandsInbox} from "./MessyHandsInbox"
+import {
+  MessyHandsMemory,
+  RememberedState,
+  deviceStore,
+  emptyState,
+  hintLine,
+} from "./MessyHandsMemory"
 import {SAMPLE_MESSAGES} from "./MessyHandsSampleMessages"
 
 /** Where the card is in the flow. */
@@ -49,11 +56,16 @@ export class MessyHandsMain extends BaseScriptComponent {
   sentHoldSeconds: number = 2
 
   @input
+  @hint("Remember replied and cleared messages between Lens sessions. Off means every start is a fresh three-message inbox.")
+  rememberBetweenSessions: boolean = true
+
+  @input
   @hint("Wireframe every collider in the scene, to check the card's hit zones. Takes effect on preview restart.")
   debugColliders: boolean = false
   @ui.group_end
 
   private inbox = new MessyHandsInbox()
+  private memory = new MessyHandsMemory(null)
   private phase: MessyHandsPhase = "idle"
   private sentTimer: DelayedCallbackEvent | null = null
 
@@ -68,12 +80,20 @@ export class MessyHandsMain extends BaseScriptComponent {
     timer.bind(() => this.returnToCompact())
     this.sentTimer = timer
 
+    // Storage is a global system, not another component, so it is safe here.
+    // A runtime without it hands back null and the Lens simply forgets.
+    this.memory = new MessyHandsMemory(this.rememberBetweenSessions ? deviceStore() : null)
+
     this.createEvent("OnStartEvent").bind(() => this.begin())
   }
 
   /**
-   * The three sample messages are waiting the moment the Lens comes up, so the
-   * card reads its count straight away. One chime marks the arrival.
+   * The sample messages are waiting the moment the Lens comes up, so the card
+   * reads its count straight away. One chime marks the arrival.
+   *
+   * "The sample messages", not "the three": anything replied to or thrown away
+   * in a previous session is still known, so a second run can legitimately open
+   * on two messages and a line saying why.
    */
   private begin(): void {
     if (!this.card || !this.audio) {
@@ -94,13 +114,23 @@ export class MessyHandsMain extends BaseScriptComponent {
       this.setColliderDebugAll(this.getSceneObject(), true)
     }
 
-    this.inbox.load(SAMPLE_MESSAGES)
+    const remembered = this.memory.load()
+    this.inbox.load(SAMPLE_MESSAGES, remembered)
     this.phase = "idle"
     this.card.setReady(false)
     this.card.setHeader(this.inbox.headerLine())
+    this.card.setMemoryHint(hintLine(remembered))
     this.card.showIdle(this.inbox.snippet())
     this.audio.playChime()
-    console.log("[MessyHandsMain] idle with " + this.inbox.count + " messages waiting")
+    console.log(
+      "[MessyHandsMain] idle with " +
+        this.inbox.count +
+        " messages waiting; remembered " +
+        remembered.sent.length +
+        " replied, " +
+        remembered.removed.length +
+        " cleared"
+    )
   }
 
   // ═══ Commands - one per voice word / card button ══════════════════════════
@@ -127,25 +157,39 @@ export class MessyHandsMain extends BaseScriptComponent {
     console.log("[MessyHandsMain] senders: " + this.inbox.senders().join(", "))
   }
 
-  /** A sender's name spoken, or that row pinched. */
-  commandOpenIndex(index: number): void {
-    if (this.phase !== "senders") return
-    if (!this.inbox.openAt(index)) return
+  /**
+   * A sender's name spoken, or that row pinched.
+   *
+   * Returns whether a message was actually opened, so callers can tell a
+   * refused command from a performed one.
+   */
+  commandOpenIndex(index: number): boolean {
+    if (this.phase !== "senders") return false
+    if (!this.inbox.openAt(index)) return false
     const m = this.inbox.current()
-    if (!m) return
+    if (!m) return false
     this.phase = "message"
-    this.card.showMessage(m.sender, m.text)
+    this.card.showMessage(m.sender, m.text, this.inbox.currentWasSent())
     console.log("[MessyHandsMain] opened " + m.sender)
+    return true
   }
 
-  /** Opens a message by sender name - the route the voice controller uses. */
+  /**
+   * Opens a message by sender name - the route the voice controller uses.
+   *
+   * Returns whether a message was OPENED, not whether the name was recognised.
+   * It used to return true as soon as a name matched, even when the phase guard
+   * had refused the open - so "Mom" spoken at the idle card reported success
+   * and nothing happened. Nothing depended on that return yet, which is exactly
+   * why it survived: the voice controller ignores it. A LEAF scenario asking
+   * "are out-of-phase commands really ignored?" is what found it.
+   */
   commandOpenSender(name: string): boolean {
     const senders = this.inbox.senders()
     const wanted = name.trim().toLowerCase()
     for (let i = 0; i < senders.length; i++) {
       if (senders[i].toLowerCase() === wanted) {
-        this.commandOpenIndex(i)
-        return true
+        return this.commandOpenIndex(i)
       }
     }
     return false
@@ -173,8 +217,10 @@ export class MessyHandsMain extends BaseScriptComponent {
     const m = this.inbox.current()
     if (!m) return
     this.phase = "sent"
+    this.inbox.markCurrentSent()
+    this.memory.save(this.inbox.snapshot())
     this.card.showSent(m.reply)
-    console.log("[MessyHandsMain] sent to " + m.sender)
+    console.log("[MessyHandsMain] sent to " + m.sender + ", remembered as replied")
     if (this.sentTimer) this.sentTimer.reset(this.sentHoldSeconds)
   }
 
@@ -184,23 +230,31 @@ export class MessyHandsMain extends BaseScriptComponent {
     const m = this.inbox.current()
     if (!m) return
     if (!this.inbox.removeCurrent()) return
+    this.memory.save(this.inbox.snapshot())
     console.log("[MessyHandsMain] removed " + m.sender + ", " + this.inbox.count + " left")
     this.returnToCompact()
   }
 
   /**
-   * Puts the inbox back to three unread messages, waiting to be started.
-   * Used to replay the demo without restarting the Lens, and by each LEAF
-   * scenario so it does not inherit the previous scenario's state.
+   * Puts the inbox back to three unread messages, waiting to be started, AND
+   * forgets everything a previous session remembered.
+   *
+   * Reset has to clear storage too, or it would not be a reset: the inbox would
+   * come straight back to two messages on the next Lens start. It is also what
+   * lets the LEAF suite stay deterministic now that state survives restarts -
+   * every scenario calls this first, so none of them inherit either the
+   * previous scenario's state or a leftover demo from yesterday.
    */
   resetDemo(): void {
     if (!this.card) return
-    this.inbox.load(SAMPLE_MESSAGES)
+    this.memory.forget()
+    this.inbox.load(SAMPLE_MESSAGES, emptyState())
     this.phase = "idle"
     this.card.setReady(false)
     this.card.setHeader(this.inbox.headerLine())
+    this.card.setMemoryHint("")
     this.card.showIdle(this.inbox.snippet())
-    console.log("[MessyHandsMain] reset to idle with " + this.inbox.count + " messages")
+    console.log("[MessyHandsMain] reset to idle with " + this.inbox.count + " messages, memory cleared")
   }
 
   /** Current phase - read by the voice controller and by tests. */
@@ -211,6 +265,43 @@ export class MessyHandsMain extends BaseScriptComponent {
   /** Sender names in list order - read by the voice controller and by tests. */
   getSenders(): string[] {
     return this.inbox.senders()
+  }
+
+  /** What is currently held for the next Lens start. Read by tests. */
+  getRemembered(): RememberedState {
+    return this.inbox.snapshot()
+  }
+
+  /** What the store itself holds right now, not what this run believes. Read by tests. */
+  getStoredState(): RememberedState {
+    return this.memory.load()
+  }
+
+  /** The memory object, so tests can ask whether this runtime can remember at all. */
+  getMemory(): MessyHandsMemory {
+    return this.memory
+  }
+
+  /** The line the card shows about a remembered session, or "". Read by tests. */
+  getMemoryHint(): string {
+    return hintLine(this.inbox.snapshot())
+  }
+
+  /**
+   * Re-runs exactly what the Lens does on start, against whatever the store
+   * holds now. This is the restore path a refresh takes, minus the process
+   * restart - see the memory scenarios.
+   */
+  reloadFromMemory(): RememberedState {
+    const remembered = this.memory.load()
+    this.inbox.load(SAMPLE_MESSAGES, remembered)
+    this.phase = "idle"
+    this.card.setReady(false)
+    this.card.setHeader(this.inbox.headerLine())
+    this.card.setMemoryHint(hintLine(remembered))
+    this.card.showIdle(this.inbox.snippet())
+    console.log("[MessyHandsMain] reloaded from memory with " + this.inbox.count + " messages")
+    return remembered
   }
 
   private returnToCompact(): void {

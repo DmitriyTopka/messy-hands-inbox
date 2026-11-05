@@ -1,0 +1,110 @@
+LEAF suite - Messy Hands Inbox - three consecutive full runs
+Date:            2026-11-06 (session of 05.11, Lens Studio clock)
+Lens Studio:     5.24.1.26100516, preview target (not on device)
+Packages:        SIK 0.18.0, Spectacles UI Kit 2.0.0, Leaf 2.0.2
+Project:         SpecsLens.esproj
+Source log:      /Users/sirenamc/Library/Preferences/Snap/Lens Studio/logs/LensStudioLog-2026-11-05-14-18-40-696-64fe9.txt
+Read from byte:  374663 (recorded before the first run)
+
+No code was changed between these three runs. The runs are back to back,
+in the order the scenarios are registered in Assets/Scenarios/LeafIndex.ts.
+
+VERDICT SOURCE
+  tool = the run_leaf_scenario MCP call returned the verdict directly.
+  log  = the MCP call timed out before the lens answered, and the verdict
+         was read from the Lens Studio log line instead. A timed-out call
+         does NOT mean the scenario failed; the lens keeps running and
+         writes its own PASSED/FAILED line, which is what is recorded here.
+  In these three runs every one of the 69 verdicts came back from the TOOL.
+  No verdict in this file was recovered from the log.
+
+Timestamps are Lens Studio's own, local time, as written to the log.
+
+==============================================================================
+RUN 1   23 scenarios   23 passed, 0 failed   14:27:02.091 -> 14:32:05.718
+==============================================================================
+TIME          SCENARIO ID                        STATUS  SOURCE
+14:27:02.091  criterion-1-status-dot             PASSED  tool
+14:27:07.640  criterion-2-card-placement         PASSED  tool
+14:27:18.005  criterion-3-who-wrote              PASSED  tool
+14:27:31.038  criterion-4-reply-and-send         PASSED  tool
+14:27:42.718  criterion-5-remove                 PASSED  tool
+14:28:08.109  flow-empty-inbox                   PASSED  tool
+14:28:18.007  flow-start-twice                   PASSED  tool
+14:28:31.696  flow-remove-while-draft-open       PASSED  tool
+14:28:49.335  flow-sent-times-out                PASSED  tool
+14:29:02.453  flow-wrong-phase-ignored           PASSED  tool
+14:29:22.256  flow-reset-twice                   PASSED  tool
+14:29:26.855  flow-long-message-truncated        PASSED  tool
+14:29:31.153  flow-inbox-logic                   PASSED  tool
+14:29:52.417  memory-survives-refresh            PASSED  tool
+14:30:12.577  memory-cleared-by-reset            PASSED  tool
+14:30:17.972  memory-store-roundtrip             PASSED  tool
+14:30:22.189  memory-removed-vs-replied          PASSED  tool
+14:30:40.324  design-readability                 PASSED  tool
+14:30:58.558  design-target-size                 PASSED  tool
+14:31:05.069  design-card-never-covers-dough     PASSED  tool
+14:31:16.440  reach-standing-user                PASSED  tool
+14:31:28.953  reach-seated-user                  PASSED  tool
+14:32:05.718  demo-tour                          PASSED  tool
+
+==============================================================================
+RUN 2   23 scenarios   23 passed, 0 failed   14:32:14.207 -> 14:37:18.652
+==============================================================================
+TIME          SCENARIO ID                        STATUS  SOURCE
+14:32:14.207  criterion-1-status-dot             PASSED  tool
+14:32:19.852  criterion-2-card-placement         PASSED  tool
+14:32:30.509  criterion-3-who-wrote              PASSED  tool
+14:32:44.019  criterion-4-reply-and-send         PASSED  tool
+14:32:55.625  criterion-5-remove                 PASSED  tool
+14:33:20.177  flow-empty-inbox                   PASSED  tool
+14:33:30.289  flow-start-twice                   PASSED  tool
+14:33:44.862  flow-remove-while-draft-open       PASSED  tool
+14:34:01.486  flow-sent-times-out                PASSED  tool
+14:34:12.354  flow-wrong-phase-ignored           PASSED  tool
+14:34:31.754  flow-reset-twice                   PASSED  tool
+14:34:35.362  flow-long-message-truncated        PASSED  tool
+14:34:38.843  flow-inbox-logic                   PASSED  tool
+14:34:58.964  memory-survives-refresh            PASSED  tool
+14:35:19.651  memory-cleared-by-reset            PASSED  tool
+14:35:24.968  memory-store-roundtrip             PASSED  tool
+14:35:29.423  memory-removed-vs-replied          PASSED  tool
+14:35:47.713  design-readability                 PASSED  tool
+14:36:05.560  design-target-size                 PASSED  tool
+14:36:12.715  design-card-never-covers-dough     PASSED  tool
+14:36:23.644  reach-standing-user                PASSED  tool
+14:36:39.627  reach-seated-user                  PASSED  tool
+14:37:18.652  demo-tour                          PASSED  tool
+
+==============================================================================
+RUN 3   23 scenarios   23 passed, 0 failed   14:37:27.387 -> 14:42:36.185
+==============================================================================
+TIME          SCENARIO ID                        STATUS  SOURCE
+14:37:27.387  criterion-1-status-dot             PASSED  tool
+14:37:33.351  criterion-2-card-placement         PASSED  tool
+14:37:44.203  criterion-3-who-wrote              PASSED  tool
+14:37:57.070  criterion-4-reply-and-send         PASSED  tool
+14:38:09.508  criterion-5-remove                 PASSED  tool
+14:38:34.967  flow-empty-inbox                   PASSED  tool
+14:38:45.298  flow-start-twice                   PASSED  tool
+14:38:59.578  flow-remove-while-draft-open       PASSED  tool
+14:39:16.517  flow-sent-times-out                PASSED  tool
+14:39:28.247  flow-wrong-phase-ignored           PASSED  tool
+14:39:49.714  flow-reset-twice                   PASSED  tool
+14:39:54.619  flow-long-message-truncated        PASSED  tool
+14:39:59.051  flow-inbox-logic                   PASSED  tool
+14:40:19.462  memory-survives-refresh            PASSED  tool
+14:40:39.451  memory-cleared-by-reset            PASSED  tool
+14:40:43.808  memory-store-roundtrip             PASSED  tool
+14:40:50.009  memory-removed-vs-replied          PASSED  tool
+14:41:08.565  design-readability                 PASSED  tool
+14:41:26.396  design-target-size                 PASSED  tool
+14:41:33.270  design-card-never-covers-dough     PASSED  tool
+14:41:44.819  reach-standing-user                PASSED  tool
+14:41:58.114  reach-seated-user                  PASSED  tool
+14:42:36.185  demo-tour                          PASSED  tool
+
+==============================================================================
+TOTAL  3 runs, 69 scenario executions, 69 passed, 0 failed
+       23 distinct scenarios, each run 3 time(s)
+==============================================================================

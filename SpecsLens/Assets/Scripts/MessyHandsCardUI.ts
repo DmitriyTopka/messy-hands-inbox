@@ -134,6 +134,16 @@ const PANE_GAP = 0.5
 const SENDER_ROW_MAX = 6.5
 
 /**
+ * Height of the "From last time: ..." row on the idle pane, in cm.
+ *
+ * Two lines' worth, and the row wraps. At 3.2 cm and no wrap the line
+ * "From last time: 1 replied, 1 cleared" ran straight off the card's right
+ * edge in the preview - 36 characters is past what 19.6 cm of inner width
+ * holds at Body size, whatever the arithmetic said.
+ */
+const MEMORY_HINT_H = 4.0
+
+/**
  * Button icon size in cm. UI Kit defaults to 1.5, which was proportionate to
  * the old small labels and reads as a speck next to the new ones. 2.4 cm gives
  * the icon the same visual weight as its label inside a 4.4 cm row.
@@ -145,7 +155,7 @@ type CardPane =
   | {kind: "idle"; snippet: string}
   | {kind: "compact"; snippet: string}
   | {kind: "senders"; senders: string[]}
-  | {kind: "message"; sender: string; text: string}
+  | {kind: "message"; sender: string; text: string; replied: boolean}
   | {kind: "draft"; sender: string; said: string; draft: string}
   | {kind: "sent"; draft: string}
 
@@ -212,6 +222,7 @@ export class MessyHandsCardUI extends BaseScriptComponent {
   // ── View state ────────────────────────────────────────────────────────────
   private pane: CardPane = {kind: "idle", snippet: ""}
   private headerLine: string = ""
+  private memoryHint: string = ""
   private ready: boolean = false
 
   onAwake(): void {
@@ -254,6 +265,21 @@ export class MessyHandsCardUI extends BaseScriptComponent {
     if (this.headerText) this.headerText.text = line
   }
 
+  /**
+   * One short line about what the card remembered from a previous session, or
+   * "" for a clean start.
+   *
+   * Shown on the idle pane only, which is the one pane the user reads before
+   * doing anything - by the time they have pinched Start the count line is the
+   * live truth and the explanation is noise. It is a row of its own rather than
+   * extra words in the header, because the header has to stay short enough to
+   * sit beside the status dot on one line.
+   */
+  setMemoryHint(line: string): void {
+    this.memoryHint = line
+    this.requestRender()
+  }
+
   /** Before "start": the summary plus the Start button. */
   showIdle(snippet: string): void {
     this.pane = {kind: "idle", snippet: snippet}
@@ -272,9 +298,15 @@ export class MessyHandsCardUI extends BaseScriptComponent {
     this.requestRender()
   }
 
-  /** An opened message: sender plus the full text. */
-  showMessage(sender: string, text: string): void {
-    this.pane = {kind: "message", sender: sender, text: text}
+  /**
+   * An opened message: sender plus the full text.
+   *
+   * `repliedEarlier` marks a message this user already answered, in this run or
+   * in a session before the Lens was last closed. Nothing is really sent, so an
+   * answered message stays readable - the mark is the only thing that says so.
+   */
+  showMessage(sender: string, text: string, repliedEarlier: boolean = false): void {
+    this.pane = {kind: "message", sender: sender, text: text, replied: repliedEarlier}
     this.requestRender()
   }
 
@@ -424,7 +456,17 @@ export class MessyHandsCardUI extends BaseScriptComponent {
     if (p.kind === "idle" || p.kind === "compact") {
       // One text row taking everything that is not the button row: the snippet
       // sits centred in the card's upper half, the button on its lower edge.
-      const snippetH = paneH - btnH - PANE_GAP
+      // When a previous session is remembered, a short mint line goes above it
+      // and the snippet gives up that height - it is one line either way.
+      const hint = p.kind === "idle" ? this.memoryHint : ""
+      const hintH = hint.length > 0 ? MEMORY_HINT_H : 0
+      const hintGap = hint.length > 0 ? PANE_GAP : 0
+      const snippetH = paneH - hintH - hintGap - btnH - PANE_GAP
+      if (hint.length > 0) {
+        items.push(
+          this.addTextRow(host, hint, "Body", hintH, innerW, TEXT_DRAFT, true, "MemoryHint")
+        )
+      }
       items.push(this.addTextRow(host, p.snippet, "Body", snippetH, innerW, TEXT_SECONDARY, true))
       if (p.kind === "idle") {
         items.push(this.addButtonRow(host, innerW, [
@@ -448,7 +490,11 @@ export class MessyHandsCardUI extends BaseScriptComponent {
     } else if (p.kind === "message") {
       const senderH = 2.8
       const textH = paneH - senderH - btnH - PANE_GAP * 2
-      items.push(this.addTextRow(host, p.sender, "Headline2", senderH, innerW, TEXT_PRIMARY, false))
+      // The mark rides on the sender row instead of taking a row of its own:
+      // the message pane is the tightest one on the card (sender + a wrapped
+      // body + two buttons) and a fourth row squeezes the body.
+      const senderLine = p.replied ? p.sender + "   \u00b7 replied" : p.sender
+      items.push(this.addTextRow(host, senderLine, "Headline2", senderH, innerW, TEXT_PRIMARY, false))
       items.push(this.addTextRow(host, p.text, "Body", textH, innerW, TEXT_SECONDARY, true))
       items.push(this.addButtonRow(host, innerW, [
         {label: "Speak", icon: ICON_SPEAK, action: () => this._onSpeak.invoke()},
@@ -481,7 +527,12 @@ export class MessyHandsCardUI extends BaseScriptComponent {
     this.paneItems = items
   }
 
-  /** One text row in the pane column. `wrap` for anything longer than a line. */
+  /**
+   * One text row in the pane column. `wrap` for anything longer than a line.
+   *
+   * `name` defaults to "Row"; pass one when a LEAF scenario needs to find that
+   * particular row rather than read the whole pane.
+   */
   private addTextRow(
     parent: SceneObject,
     value: string,
@@ -489,9 +540,10 @@ export class MessyHandsCardUI extends BaseScriptComponent {
     heightCm: number,
     widthCm: number,
     color: vec4,
-    wrap: boolean
+    wrap: boolean,
+    name: string = "Row"
   ): FlexItem {
-    const so = this.obj(parent, "Row")
+    const so = this.obj(parent, name)
     this.liftInZ(so, LAYOUT_Z_LIFT)
     const t = so.createComponent("Component.Text") as Text
     t.text = value
