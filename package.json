@@ -1,0 +1,9 @@
+{
+  "name": "messy-hands-inbox",
+  "private": true,
+  "type": "module",
+  "description": "Node tests for the scene-free logic of the Messy Hands Inbox Lens",
+  "scripts": {
+    "test": "npx -y tsx@4.19.2 --test tests/*.test.mjs"
+  }
+}

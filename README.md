@@ -24,7 +24,7 @@ The demo uses stand-ins on purpose: three hard-coded messages, a hard-coded gist
 
 1. **Plan.** The `plan-lens` interview turned the idea into a design brief: the one spatial moment, where each thing sits in centimetres, how you act on it with your hands, and five done criteria. Brief: [`devpost/design-brief.md`](devpost/design-brief.md).
 2. **Build.** Snap's CLAD agents (the `ls-clad` plugin for Claude Code, connected to Lens Studio over MCP) built the Lens from the brief.
-3. **Test.** LEAF scenarios check each done criterion in the preview. Round 1: 6 of 6 pass. Round 2 (05.11): 23 scenarios, three full runs in a row, 69 of 69 pass (`devpost/leaf_runs_0611.txt`).
+3. **Test.** LEAF scenarios check each done criterion in the preview. Round 1: 6 of 6 pass. Round 2 (05.11): 23 scenarios, three full runs in a row, 69 of 69 pass (`devpost/leaf_runs_0611.txt`). The scene-free logic (inbox, memory, sample data) also has 16 Node tests: `npm test` (`devpost/node_tests_0611.txt`).
 4. **Fix with design notes.** After the first build the card text was too small and too pale for an additive display. One design note ("larger, near-white, readable at 55 cm") fixed it; tests re-run green.
 
 Build details, measurements and the bugs found along the way: [`devpost/build-notes.md`](devpost/build-notes.md). Preview walkthrough screenshots: `devpost/walkthrough/`.

@@ -1,0 +1,24 @@
+✔ a clean start holds three messages (0.942708ms)
+✔ header line covers one and none (0.1145ms)
+✔ snippet names the newest sender and cuts long text at 30 characters (0.093ms)
+✔ openAt refuses rows that do not exist (0.072875ms)
+✔ send marks the message as replied but keeps it in the inbox (0.117667ms)
+✔ sending the same message twice records it once (0.0565ms)
+✔ send and remove with nothing open do nothing (0.071292ms)
+✔ remove drops the open message, closes it and drops the count (0.075084ms)
+✔ a removed message never comes back after a restart (0.063584ms)
+✔ a replied message comes back after a restart, marked as replied (0.105083ms)
+✔ snapshot is a copy, not a live view of the inbox (0.068791ms)
+✔ memory round trip: save, load, forget (0.156042ms)
+✔ forget removes only this demo's keys, not the whole store (0.061375ms)
+✔ a runtime with no storage forgets safely and never throws (0.07175ms)
+✔ hint line wording matches the card (0.073667ms)
+✔ sample data: three messages, stable unique ids, every field filled (0.11975ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 143.867125
