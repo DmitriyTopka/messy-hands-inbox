@@ -9,3 +9,9 @@ devpost/devpost_page_backup_*.html
 video/vo_dima/*_raw.wav
 video/vo_dima/take1/
 video/*_up.mp4
+
+# internal notes, not for the public repo
+COUNCIL_*.md
+council_*/
+CHECKLIST_WIN_*.md
+WINNERS_ANALYSIS_*.md
